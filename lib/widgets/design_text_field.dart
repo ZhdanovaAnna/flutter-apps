@@ -28,7 +28,10 @@ class DesignTextField extends StatelessWidget {
       keyboardType: keyboardType,
       validator: validator,
 
-      style: const TextStyle(fontSize: 16, color: AppColors.text, height: 1),
+      // Возвращаем исходный размер.
+      // Он потом масштабируется вместе со всем макетом
+      // через FittedBox.
+      style: const TextStyle(fontSize: 10.5, color: AppColors.text, height: 1),
 
       cursorColor: AppColors.green,
 
@@ -40,13 +43,13 @@ class DesignTextField extends StatelessWidget {
 
         labelStyle: const TextStyle(
           color: AppColors.muted,
-          fontSize: 16,
+          fontSize: 9.5,
           fontWeight: FontWeight.w400,
         ),
 
         hintStyle: const TextStyle(
           color: AppColors.muted,
-          fontSize: 16,
+          fontSize: 10.5,
           fontWeight: FontWeight.w400,
         ),
 
@@ -66,6 +69,8 @@ class DesignTextField extends StatelessWidget {
           borderSide: BorderSide(color: AppColors.green),
         ),
 
+        // Ошибку внутри поля не показываем,
+        // как было в исходном дизайне.
         errorStyle: const TextStyle(height: 0, fontSize: 0),
       ),
     );

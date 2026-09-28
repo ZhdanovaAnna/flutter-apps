@@ -12,32 +12,53 @@ class DesignScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
 
-      resizeToAvoidBottomInset: false,
+      // ВАЖНО:
+      // клавиатура должна уменьшать доступную область,
+      // чтобы SingleChildScrollView мог прокрутить форму.
+      resizeToAvoidBottomInset: true,
 
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final widthScale = constraints.maxWidth / AppMetrics.designWidth;
-
-            final scale = widthScale.clamp(0.8, 2.0).toDouble();
+            // Масштабируем дизайн только по ширине.
+            //
+            // Нельзя учитывать height:
+            // при открытии клавиатуры высота резко уменьшается,
+            // из-за этого раньше весь экран начинал пересчитывать масштаб.
+            final scale = (constraints.maxWidth / AppMetrics.designWidth)
+                .clamp(0.8, 2.0)
+                .toDouble();
 
             final contentWidth = AppMetrics.designWidth * scale;
             final contentHeight = AppMetrics.designHeight * scale;
 
             return SingleChildScrollView(
-              physics: const ClampingScrollPhysics(),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+
+              // Небольшое место снизу, чтобы кнопку/поле
+              // можно было полностью вывести над клавиатурой.
+              padding: const EdgeInsets.only(bottom: 24),
+
               child: SizedBox(
                 width: constraints.maxWidth,
-                height: constraints.maxHeight < contentHeight
+
+                // Если экран выше макета — растягиваем область.
+                // Если клавиатура уменьшила экран — макет остаётся
+                // полноценного размера и его можно прокручивать.
+                height: contentHeight > constraints.maxHeight
                     ? contentHeight
                     : constraints.maxHeight,
-                child: Center(
+
+                child: Align(
+                  alignment: Alignment.topCenter,
                   child: SizedBox(
                     width: contentWidth,
                     height: contentHeight,
+
                     child: FittedBox(
                       fit: BoxFit.fill,
-                      alignment: Alignment.center,
+                      alignment: Alignment.topCenter,
+
                       child: SizedBox(
                         width: AppMetrics.designWidth,
                         height: AppMetrics.designHeight,
