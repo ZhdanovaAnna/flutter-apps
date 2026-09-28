@@ -171,7 +171,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     controller: _height,
                     focusNode: _heightFocus,
                     label: 'Рост (см)',
-                    hint: '185',
+                    hint: '',
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
@@ -188,7 +188,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     controller: _weight,
                     focusNode: _weightFocus,
                     label: 'Вес (кг)',
-                    hint: '77',
+                    hint: '',
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),

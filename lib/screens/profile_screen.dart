@@ -6,6 +6,7 @@ import '../services/supabase_service.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/screen_shell.dart';
 import 'calculator_screen.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -17,6 +18,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   List<BmiRecord> _history = const [];
   bool _loading = true;
+  bool _loggingOut = false;
   String? _error;
 
   String get _firstName => SupabaseService.instance.firstName;
@@ -42,7 +44,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (!mounted) return;
 
-      setState(() => _history = history);
+      setState(() {
+        _history = history;
+      });
     } catch (_) {
       if (mounted) {
         setState(() {
@@ -51,13 +55,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } finally {
       if (mounted) {
-        setState(() => _loading = false);
+        setState(() {
+          _loading = false;
+        });
       }
     }
   }
 
   Future<void> _logout() async {
-    await SupabaseService.instance.signOut();
+    if (_loggingOut) return;
+
+    setState(() {
+      _loggingOut = true;
+    });
+
+    try {
+      await SupabaseService.instance.signOut();
+
+      if (!mounted) return;
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _loggingOut = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Не удалось выйти из аккаунта. '
+            'Попробуйте ещё раз.',
+          ),
+        ),
+      );
+    }
   }
 
   String _date(DateTime date) {
@@ -200,17 +236,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
 
           SizedBox(
-            height: 48,
+            width: double.infinity,
+            height: 52,
             child: OutlinedButton.icon(
-              onPressed: _logout,
-              icon: const Icon(Icons.logout),
-              label: const Text('Выйти из аккаунта'),
+              onPressed: _loggingOut ? null : _logout,
+
+              icon: _loggingOut
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.red,
+                      ),
+                    )
+                  : const Icon(Icons.logout, size: 21),
+
+              label: Text(
+                _loggingOut ? 'ВЫХОД...' : 'ВЫЙТИ ИЗ АККАУНТА',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.red,
-                side: const BorderSide(color: AppColors.red),
+
+                disabledForegroundColor: AppColors.muted,
+
+                side: const BorderSide(color: AppColors.red, width: 1.5),
+
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -218,7 +277,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -365,7 +424,9 @@ class _Metric extends StatelessWidget {
             label,
             style: const TextStyle(color: AppColors.muted, fontSize: 13),
           ),
+
           const SizedBox(height: 2),
+
           Text(
             value,
             maxLines: 1,
