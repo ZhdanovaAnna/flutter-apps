@@ -27,33 +27,45 @@ class DesignTextField extends StatelessWidget {
       obscureText: obscureText,
       keyboardType: keyboardType,
       validator: validator,
-      style: const TextStyle(fontSize: 10.5, color: AppColors.text, height: 1),
+
+      style: const TextStyle(fontSize: 16, color: AppColors.text, height: 1),
+
       cursorColor: AppColors.green,
+
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
+
         floatingLabelBehavior: FloatingLabelBehavior.always,
+
         labelStyle: const TextStyle(
           color: AppColors.muted,
-          fontSize: 9.5,
+          fontSize: 16,
           fontWeight: FontWeight.w400,
         ),
+
         hintStyle: const TextStyle(
           color: AppColors.muted,
-          fontSize: 10.5,
+          fontSize: 16,
           fontWeight: FontWeight.w400,
         ),
+
         isDense: true,
+
         contentPadding: const EdgeInsets.only(bottom: 6, top: 12),
+
         border: const UnderlineInputBorder(
           borderSide: BorderSide(color: AppColors.border),
         ),
+
         enabledBorder: const UnderlineInputBorder(
           borderSide: BorderSide(color: AppColors.border),
         ),
+
         focusedBorder: const UnderlineInputBorder(
           borderSide: BorderSide(color: AppColors.green),
         ),
+
         errorStyle: const TextStyle(height: 0, fontSize: 0),
       ),
     );

@@ -12,40 +12,32 @@ class DesignScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
 
-      // Не уменьшаем весь интерфейс при появлении клавиатуры.
       resizeToAvoidBottomInset: false,
 
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            // Масштабируем дизайн ТОЛЬКО по ширине.
-            //
-            // Раньше здесь учитывалась ещё и высота:
-            //
-            // constraints.maxHeight / AppMetrics.designHeight
-            //
-            // Из-за этого при открытии клавиатуры весь экран
-            // резко уменьшался.
-            final scale = (constraints.maxWidth / AppMetrics.designWidth)
-                .clamp(1.0, 2.0)
-                .toDouble();
+            final widthScale = constraints.maxWidth / AppMetrics.designWidth;
 
-            final width = AppMetrics.designWidth * scale;
-            final height = AppMetrics.designHeight * scale;
+            final scale = widthScale.clamp(0.8, 2.0).toDouble();
+
+            final contentWidth = AppMetrics.designWidth * scale;
+            final contentHeight = AppMetrics.designHeight * scale;
 
             return SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
               child: SizedBox(
                 width: constraints.maxWidth,
-                height: height > constraints.maxHeight
-                    ? height
+                height: constraints.maxHeight < contentHeight
+                    ? contentHeight
                     : constraints.maxHeight,
                 child: Center(
                   child: SizedBox(
-                    width: width,
-                    height: height,
+                    width: contentWidth,
+                    height: contentHeight,
                     child: FittedBox(
                       fit: BoxFit.fill,
+                      alignment: Alignment.center,
                       child: SizedBox(
                         width: AppMetrics.designWidth,
                         height: AppMetrics.designHeight,
