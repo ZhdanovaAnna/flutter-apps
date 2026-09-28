@@ -6,7 +6,6 @@ import '../services/supabase_service.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/screen_shell.dart';
 import 'calculator_screen.dart';
-import '../widgets/design_button.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});

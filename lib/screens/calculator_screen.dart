@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../core/bmi_calculator.dart';
 import '../core/constants.dart';
-import '../models/bmi_record.dart';
 import '../services/supabase_service.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/design_button.dart';

@@ -5,7 +5,6 @@ import 'core/constants.dart';
 import 'core/supabase_config.dart';
 import 'screens/calculator_screen.dart';
 import 'screens/login_screen.dart';
-import 'screens/profile_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,7 +52,8 @@ class _AuthGate extends StatelessWidget {
     return StreamBuilder<AuthState>(
       stream: Supabase.instance.client.auth.onAuthStateChange,
       builder: (context, snapshot) {
-        final session = snapshot.data?.session ??
+        final session =
+            snapshot.data?.session ??
             Supabase.instance.client.auth.currentSession;
         return session == null ? const LoginScreen() : const CalculatorScreen();
       },
