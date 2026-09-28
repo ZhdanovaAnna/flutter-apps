@@ -8,70 +8,67 @@ class DesignTextField extends StatelessWidget {
     required this.controller,
     required this.label,
     required this.hint,
+    this.focusNode,
     this.obscureText = false,
     this.keyboardType,
+    this.textInputAction,
     this.validator,
+    this.onFieldSubmitted,
   });
 
   final TextEditingController controller;
   final String label;
   final String hint;
+  final FocusNode? focusNode;
   final bool obscureText;
   final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
   final String? Function(String?)? validator;
+  final ValueChanged<String>? onFieldSubmitted;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      focusNode: focusNode,
       obscureText: obscureText,
       keyboardType: keyboardType,
+      textInputAction: textInputAction,
       validator: validator,
-
-      // Возвращаем исходный размер.
-      // Он потом масштабируется вместе со всем макетом
-      // через FittedBox.
-      style: const TextStyle(fontSize: 10.5, color: AppColors.text, height: 1),
-
+      onFieldSubmitted: onFieldSubmitted,
+      style: const TextStyle(fontSize: 16, color: AppColors.text),
       cursorColor: AppColors.green,
-
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-
         floatingLabelBehavior: FloatingLabelBehavior.always,
-
-        labelStyle: const TextStyle(
-          color: AppColors.muted,
-          fontSize: 9.5,
-          fontWeight: FontWeight.w400,
+        labelStyle: const TextStyle(color: AppColors.muted, fontSize: 16),
+        hintStyle: const TextStyle(color: AppColors.muted, fontSize: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 15,
         ),
-
-        hintStyle: const TextStyle(
-          color: AppColors.muted,
-          fontSize: 10.5,
-          fontWeight: FontWeight.w400,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
-
-        isDense: true,
-
-        contentPadding: const EdgeInsets.only(bottom: 6, top: 12),
-
-        border: const UnderlineInputBorder(
-          borderSide: BorderSide(color: AppColors.border),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
-
-        enabledBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: AppColors.border),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: AppColors.green, width: 2),
         ),
-
-        focusedBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: AppColors.green),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: AppColors.red),
         ),
-
-        // Ошибку внутри поля не показываем,
-        // как было в исходном дизайне.
-        errorStyle: const TextStyle(height: 0, fontSize: 0),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: AppColors.red, width: 2),
+        ),
+        errorStyle: const TextStyle(fontSize: 12, color: AppColors.red),
       ),
     );
   }

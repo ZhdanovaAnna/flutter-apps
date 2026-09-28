@@ -7,7 +7,7 @@ class DesignButton extends StatelessWidget {
     super.key,
     required this.text,
     required this.onPressed,
-    this.height = 27,
+    this.height = 52,
   });
 
   final String text;
@@ -17,8 +17,8 @@ class DesignButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: height,
       width: double.infinity,
+      height: height,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
@@ -27,15 +27,20 @@ class DesignButton extends StatelessWidget {
           disabledBackgroundColor: AppColors.green.withValues(alpha: .55),
           disabledForegroundColor: Colors.white,
           elevation: 0,
-          padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 9.5,
-            fontWeight: FontWeight.w700,
-            letterSpacing: .1,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              letterSpacing: .1,
+            ),
           ),
         ),
       ),

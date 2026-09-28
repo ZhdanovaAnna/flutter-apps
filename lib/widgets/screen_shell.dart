@@ -3,68 +3,39 @@ import 'package:flutter/material.dart';
 import '../core/constants.dart';
 
 class DesignScreen extends StatelessWidget {
-  const DesignScreen({super.key, required this.child});
+  const DesignScreen({
+    super.key,
+    required this.child,
+    this.bottomNavigationBar,
+  });
 
   final Widget child;
+  final Widget? bottomNavigationBar;
 
   @override
   Widget build(BuildContext context) {
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+
     return Scaffold(
       backgroundColor: AppColors.background,
-
-      // ВАЖНО:
-      // клавиатура должна уменьшать доступную область,
-      // чтобы SingleChildScrollView мог прокрутить форму.
       resizeToAvoidBottomInset: true,
-
+      bottomNavigationBar: keyboardOpen ? null : bottomNavigationBar,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            // Масштабируем дизайн только по ширине.
-            //
-            // Нельзя учитывать height:
-            // при открытии клавиатуры высота резко уменьшается,
-            // из-за этого раньше весь экран начинал пересчитывать масштаб.
-            final scale = (constraints.maxWidth / AppMetrics.designWidth)
-                .clamp(0.8, 2.0)
-                .toDouble();
-
-            final contentWidth = AppMetrics.designWidth * scale;
-            final contentHeight = AppMetrics.designHeight * scale;
-
             return SingleChildScrollView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-
-              // Небольшое место снизу, чтобы кнопку/поле
-              // можно было полностью вывести над клавиатурой.
-              padding: const EdgeInsets.only(bottom: 24),
-
-              child: SizedBox(
-                width: constraints.maxWidth,
-
-                // Если экран выше макета — растягиваем область.
-                // Если клавиатура уменьшила экран — макет остаётся
-                // полноценного размера и его можно прокручивать.
-                height: contentHeight > constraints.maxHeight
-                    ? contentHeight
-                    : constraints.maxHeight,
-
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: SizedBox(
-                    width: contentWidth,
-                    height: contentHeight,
-
-                    child: FittedBox(
-                      fit: BoxFit.fill,
-                      alignment: Alignment.topCenter,
-
-                      child: SizedBox(
-                        width: AppMetrics.designWidth,
-                        height: AppMetrics.designHeight,
-                        child: child,
-                      ),
-                    ),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight > 52
+                      ? constraints.maxHeight - 52
+                      : 0,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 440),
+                    child: child,
                   ),
                 ),
               ),
@@ -85,19 +56,20 @@ class DesignCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppMetrics.cardRadius),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(
             color: Color(0x22000000),
-            blurRadius: 7,
+            blurRadius: 12,
             spreadRadius: 1,
-            offset: Offset(0, 1),
+            offset: Offset(0, 3),
           ),
         ],
       ),
-      padding: padding,
+      padding: padding ?? const EdgeInsets.all(20),
       child: child,
     );
   }

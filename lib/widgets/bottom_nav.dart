@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../core/constants.dart';
+
 class BottomNav extends StatelessWidget {
   const BottomNav({
     super.key,
@@ -12,33 +14,50 @@ class BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 35,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE4E4E4))),
-      ),
-      child: Row(
-        children: [
-          Expanded(child: _item(0, 'Калькулятор')),
-          Expanded(child: _item(1, 'Профиль')),
-        ],
+    return SafeArea(
+      top: false,
+      child: Container(
+        height: 58,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(top: BorderSide(color: AppColors.border)),
+        ),
+        child: Row(
+          children: [
+            Expanded(child: _item(0, Icons.calculate_outlined, 'Калькулятор')),
+            Expanded(child: _item(1, Icons.person_outline, 'Профиль')),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _item(int index, String label) {
+  Widget _item(int index, IconData icon, String label) {
     final selected = selectedIndex == index;
+
     return InkWell(
       onTap: () => onTap(index),
       child: Center(
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 9,
-            color: selected ? const Color(0xFF555555) : const Color(0xFF888888),
-            fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 22,
+              color: selected ? AppColors.green : AppColors.muted,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12,
+                color: selected ? AppColors.green : AppColors.muted,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ],
         ),
       ),
     );

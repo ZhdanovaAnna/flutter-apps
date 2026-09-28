@@ -20,7 +20,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? _error;
 
   String get _firstName => SupabaseService.instance.firstName;
+
   String get _lastName => SupabaseService.instance.lastName;
+
   String get _email => SupabaseService.instance.email;
 
   @override
@@ -37,21 +39,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final history = await SupabaseService.instance.getHistory();
+
       if (!mounted) return;
+
       setState(() => _history = history);
     } catch (_) {
       if (mounted) {
-        setState(() => _error = 'Не удалось загрузить историю расчётов');
+        setState(() {
+          _error = 'Не удалось загрузить историю расчётов';
+        });
       }
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
+  }
+
+  Future<void> _logout() async {
+    await SupabaseService.instance.signOut();
   }
 
   String _date(DateTime date) {
     String two(int n) => n.toString().padLeft(2, '0');
-    return '${two(date.day)}.${two(date.month)}.${date.year}, '
-        '${two(date.hour)}:${two(date.minute)}';
+
+    return '${two(date.day)}.'
+        '${two(date.month)}.'
+        '${date.year}, '
+        '${two(date.hour)}:'
+        '${two(date.minute)}';
   }
 
   @override
@@ -59,58 +75,71 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final fullName = '$_firstName $_lastName'.trim();
 
     return DesignScreen(
+      bottomNavigationBar: BottomNav(
+        selectedIndex: 1,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const CalculatorScreen()),
+            );
+          }
+        },
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 30),
-          Container(
-            width: 188,
-            height: 104,
-            padding: const EdgeInsets.fromLTRB(11, 12, 11, 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x22000000),
-                  blurRadius: 7,
-                  spreadRadius: 1,
-                  offset: Offset(0, 1),
-                ),
-              ],
+          const SizedBox(height: 8),
+
+          const Text(
+            'Профиль',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppColors.green,
+              fontSize: 30,
+              fontWeight: FontWeight.w700,
             ),
+          ),
+
+          const SizedBox(height: 24),
+
+          DesignCard(
             child: Row(
               children: [
-                const ClipOval(
-                  child: SizedBox(
-                    width: 52,
-                    height: 52,
-                    child: Icon(Icons.person_outline),
+                ClipOval(
+                  child: Image.asset(
+                    'assets/avatar.png',
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
                   ),
                 ),
-                const SizedBox(width: 9),
+
+                const SizedBox(width: 16),
+
                 Expanded(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         fullName.isEmpty ? 'Имя Фамилия' : fullName,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: AppColors.text,
-                          fontSize: 8,
+                          fontSize: 18,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 2),
+
+                      const SizedBox(height: 6),
+
                       Text(
-                        _email,
-                        maxLines: 1,
+                        _email.isEmpty ? 'Email' : _email,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: AppColors.text,
-                          fontSize: 7,
+                          color: AppColors.muted,
+                          fontSize: 14,
                         ),
                       ),
                     ],
@@ -119,81 +148,102 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 8),
-          Container(
-            width: 188,
-            height: 28,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x22000000),
-                  blurRadius: 6,
-                  offset: Offset(0, 1),
+
+          const SizedBox(height: 16),
+
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'История расчётов',
+                  style: TextStyle(
+                    color: AppColors.text,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
+              ),
+
+              IconButton(
+                onPressed: _loading ? null : _loadHistory,
+                tooltip: 'Обновить',
+                icon: const Icon(Icons.refresh),
+                color: AppColors.green,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          if (_loading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (_error != null)
+            _MessageCard(text: _error!, color: AppColors.red)
+          else if (_history.isEmpty)
+            const _MessageCard(
+              text: 'История расчётов пока пуста',
+              color: AppColors.muted,
+            )
+          else
+            Column(
+              children: [
+                for (final record in _history) ...[
+                  _HistoryCard(
+                    record: record,
+                    dateText: _date(record.createdAt),
+                  ),
+                  const SizedBox(height: 12),
+                ],
               ],
             ),
-            child: TextButton(
-              onPressed: _loadHistory,
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 9),
-                alignment: Alignment.centerLeft,
-              ),
-              child: const Text(
-                'Активность',
-                style: TextStyle(
-                  color: AppColors.green,
-                  fontSize: 8,
-                  fontWeight: FontWeight.w700,
+
+          const SizedBox(height: 8),
+
+          SizedBox(
+            height: 48,
+            child: OutlinedButton.icon(
+              onPressed: _logout,
+              icon: const Icon(Icons.logout),
+              label: const Text('Выйти из аккаунта'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.red,
+                side: const BorderSide(color: AppColors.red),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : _error != null
-                ? Center(
-                    child: Text(
-                      _error!,
-                      style: const TextStyle(color: AppColors.red, fontSize: 8),
-                      textAlign: TextAlign.center,
-                    ),
-                  )
-                : _history.isEmpty
-                ? const Center(
-                    child: Text(
-                      'История расчётов пока пуста',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: AppColors.muted, fontSize: 8),
-                    ),
-                  )
-                : ListView.separated(
-                    padding: EdgeInsets.zero,
-                    itemCount: _history.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      final record = _history[index];
-                      return _HistoryCard(
-                        record: record,
-                        dateText: _date(record.createdAt),
-                      );
-                    },
-                  ),
-          ),
-          BottomNav(
-            selectedIndex: 1,
-            onTap: (index) {
-              if (index == 0) {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const CalculatorScreen()),
-                );
-              }
-            },
-          ),
+
+          const SizedBox(height: 12),
         ],
+      ),
+    );
+  }
+}
+
+class _MessageCard extends StatelessWidget {
+  const _MessageCard({required this.text, required this.color});
+
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(color: color, fontSize: 15),
       ),
     );
   }
@@ -206,75 +256,91 @@ class _HistoryCard extends StatelessWidget {
   final String dateText;
 
   String _category(double bmi) {
-    if (bmi <= 16) return 'Выраженный дефицит массы тела';
-    if (bmi < 18.5) return 'Недостаточная масса тела';
-    if (bmi < 25) return 'Норма';
-    if (bmi < 30) return 'Избыточная масса тела или предожирение';
-    if (bmi < 35) return 'Ожирение';
-    if (bmi < 40) return 'Ожирение резкое';
+    if (bmi <= 16) {
+      return 'Выраженный дефицит массы тела';
+    }
+
+    if (bmi < 18.5) {
+      return 'Недостаточная масса тела';
+    }
+
+    if (bmi < 25) {
+      return 'Норма';
+    }
+
+    if (bmi < 30) {
+      return 'Избыточная масса тела или предожирение';
+    }
+
+    if (bmi < 35) {
+      return 'Ожирение';
+    }
+
+    if (bmi < 40) {
+      return 'Ожирение резкое';
+    }
+
     return 'Очень резкое ожирение';
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 188,
-      constraints: const BoxConstraints(minHeight: 82),
-      padding: const EdgeInsets.fromLTRB(10, 9, 10, 8),
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x22000000),
-            blurRadius: 7,
-            spreadRadius: 1,
-            offset: Offset(0, 1),
+            color: Color(0x18000000),
+            blurRadius: 8,
+            offset: Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Время расчёта',
-            style: TextStyle(color: AppColors.muted, fontSize: 7),
-          ),
           Text(
             dateText,
-            style: const TextStyle(
-              color: AppColors.text,
-              fontSize: 8,
-              fontWeight: FontWeight.w700,
-            ),
+            style: const TextStyle(color: AppColors.muted, fontSize: 13),
           ),
-          const SizedBox(height: 6),
+
+          const SizedBox(height: 12),
+
           Row(
             children: [
-              _Metric(label: 'Рост', value: record.heightCm.toStringAsFixed(0)),
-              const SizedBox(width: 18),
-              _Metric(label: 'Вес', value: record.weightKg.toStringAsFixed(0)),
-              const SizedBox(width: 18),
               _Metric(
-                label: 'Индекс массы тела',
-                value: record.bmi.toStringAsFixed(2),
+                label: 'Рост',
+                value: '${record.heightCm.toStringAsFixed(0)} см',
               ),
+              const SizedBox(width: 12),
+              _Metric(
+                label: 'Вес',
+                value: '${record.weightKg.toStringAsFixed(0)} кг',
+              ),
+              const SizedBox(width: 12),
+              _Metric(label: 'ИМТ', value: record.bmi.toStringAsFixed(2)),
             ],
           ),
-          const SizedBox(height: 5),
+
+          const SizedBox(height: 12),
+
           const Text(
             'Рекомендация',
-            style: TextStyle(color: AppColors.muted, fontSize: 7),
+            style: TextStyle(color: AppColors.muted, fontSize: 13),
           ),
+
+          const SizedBox(height: 4),
+
           Text(
-            '${_category(record.bmi)}. ${record.recommendation}',
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
+            '${_category(record.bmi)}. '
+            '${record.recommendation}',
             style: const TextStyle(
               color: AppColors.text,
-              fontSize: 7.1,
-              fontWeight: FontWeight.w700,
-              height: 1.2,
+              fontSize: 14,
+              height: 1.35,
             ),
           ),
         ],
@@ -297,14 +363,16 @@ class _Metric extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(color: AppColors.muted, fontSize: 6.5),
+            style: const TextStyle(color: AppColors.muted, fontSize: 13),
           ),
-          const SizedBox(height: 1),
+          const SizedBox(height: 2),
           Text(
             value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               color: AppColors.text,
-              fontSize: 8,
+              fontSize: 15,
               fontWeight: FontWeight.w700,
             ),
           ),
